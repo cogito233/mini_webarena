@@ -42,7 +42,7 @@ key_states = {}  # { key: {"valid": True} }
 #  3) 两个独立的 worker
 # =====================
 import pandas as pd
-from object_store import ObjectStore
+from mini_webarena.object_store import ObjectStore
 store = ObjectStore(db_path="browser.db")
 from mini_webarena.env_worker import WikiQAEnv
 
