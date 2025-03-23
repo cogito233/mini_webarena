@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 # 假设你的 BaseLanguageBasedEnv 就在同目录下的 base.py
-from ragen.env.base import BaseLanguageBasedEnv
+from .env_base import BaseLanguageBasedEnv
 from .browser_actions import (
     Action,
     ActionTypes,

@@ -59,7 +59,7 @@ def client_step(server_url, query, keys):
 
 # ================ 下面是你原先的基础类和一些依赖 ================
 # 假设你的 BaseLanguageBasedEnv 就在同目录下的 base.py
-from ragen.env.base import BaseLanguageBasedEnv
+from .env_base import BaseLanguageBasedEnv
 
 # 这里的 ActionTypes、create_xxx_action 等，是你原先用来解析模型输出动作的
 from .browser_actions import (
