@@ -2,6 +2,7 @@
 ## Install
 ```bash
 pip install -e .
+pip uninstall uvloop # a weird problem
 ```
 
 ## Try

@@ -34,7 +34,7 @@ import torch
 import os
 
 from typing import Any
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import cosine
 import time
 
