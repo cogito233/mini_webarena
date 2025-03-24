@@ -21,13 +21,15 @@ from .browser_actions import (
 )
 from .browser_env import ScriptBrowserEnv, Trajectory
 
+
 class WikiQAEnv(BaseLanguageBasedEnv):
     def __init__(
-        self,
-        question, gt,
-        max_steps: int = 10,
-        threshold: float = 0.7,
-        prompt_format = "last", # full, last, single, tunc
+            self,
+            question, gt,
+            max_steps: int = 10,
+            threshold: float = 0.7,
+            prompt_format="last",  # full, last, single, tunc
+            url = None
     ):
         """
         Args:
@@ -81,7 +83,10 @@ class WikiQAEnv(BaseLanguageBasedEnv):
         # print("[DEBUG] WikiQAEnv init Checkpoint 5")
         from .agent import construct_promptConstructor
         self.prompt_constructor, self.tokenizer, _ = construct_promptConstructor("Qwen/Qwen2.5-14B-Instruct", None)
-        self.url = "http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+        if url == None:
+            self.url = "http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+        else:
+            self.url = url
 
         # print("[DEBUG] WikiQAEnv init Checkpoint 6")
         obs, info = self.env.reset_without_config(start_url=self.url)
@@ -96,7 +101,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
 
         # print("=" * 30)
 
-    def reset_qa(self, question, gt, url = None) -> Any:
+    def reset_qa(self, question, gt, url=None) -> Any:
         print("[DEBUG] WikiQAEnv reset_qa Checkpoint 1")
         self.question = question
         self.gt = gt
@@ -111,7 +116,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
             self.url = url
         else:
             self.url = "http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
-            
+
         obs, info = self.env.reset_without_config(start_url=self.url)
 
         print("[DEBUG] WikiQAEnv reset_qa Checkpoint 2")
@@ -140,7 +145,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
         # from .rl_utils import format_score
         # from .evaluator import fuzzy_match
         # is_success = action_extracted["action_type"] == ActionTypes.NONE
-        format_reward = 0 # Placeholder
+        format_reward = 0  # Placeholder
         if action_extracted["action_type"] == ActionTypes.CHECK or action_extracted["action_type"] == ActionTypes.STOP:
             self.answer_made = True
             self.done = True
@@ -148,7 +153,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
             self.pred = action_extracted['answer']
             # print(action_extracted)
             # print("#"*100)
-            self.answer_similarity = 0 # Modified, no need calculate reward here
+            self.answer_similarity = 0  # Modified, no need calculate reward here
             answer_reward = self.answer_similarity
             reward = -0.01 + format_reward + answer_reward
             self.reward += reward
@@ -160,7 +165,8 @@ class WikiQAEnv(BaseLanguageBasedEnv):
 
         reward = -0.01 + format_reward
         self.reward += reward
-        self.history.append({"role": "assistant", "pred": action, "reward": reward, "action_extracted": action_extracted})
+        self.history.append(
+            {"role": "assistant", "pred": action, "reward": reward, "action_extracted": action_extracted})
         # Step 2. execute action
         # print(action_extracted)
         try:
@@ -176,8 +182,9 @@ class WikiQAEnv(BaseLanguageBasedEnv):
         # print(obs)
         # print(terminated)
         self.url = self.env.page.url
-        self.history.append({"role": "user", "question": self.question, "url": self.url, "observation": obs[self.obs_modality],
-                             "previous_action": action_str})
+        self.history.append(
+            {"role": "user", "question": self.question, "url": self.url, "observation": obs[self.obs_modality],
+             "previous_action": action_str})
         observation = self.render()
         # print()
         # print(observation)
@@ -205,10 +212,10 @@ class WikiQAEnv(BaseLanguageBasedEnv):
                 if item["role"] == "system":
                     ans += self.template_dict['system']
                 elif item["role"] == "user":
-                    ans += self.template_dict['user'].format(objective = item["question"], url = item["url"], observation
-                    = item["observation"], previous_action = item["previous_action"])
+                    ans += self.template_dict['user'].format(objective=item["question"], url=item["url"], observation
+                    =item["observation"], previous_action=item["previous_action"])
                 elif item["role"] == "assistant":
-                    ans += self.template_dict['assistant'].format(pred = item["pred"])
+                    ans += self.template_dict['assistant'].format(pred=item["pred"])
                 else:
                     raise ValueError("role not recognized")
             return ans + "<|im_start|>assistant"
@@ -219,10 +226,10 @@ class WikiQAEnv(BaseLanguageBasedEnv):
                 if item["role"] == "system":
                     ans += self.template_dict['system']
                 elif item["role"] == "user":
-                    ans += self.template_dict['user'].format(objective = item["question"], url = item["url"], observation
-                    = item["observation"], previous_action = item["previous_action"])
+                    ans += self.template_dict['user'].format(objective=item["question"], url=item["url"], observation
+                    =item["observation"], previous_action=item["previous_action"])
                 elif item["role"] == "assistant":
-                    ans += self.template_dict['assistant'].format(pred = item["pred"])
+                    ans += self.template_dict['assistant'].format(pred=item["pred"])
                 else:
                     raise ValueError("role not recognized")
             return ans + "<|im_start|>assistant"
@@ -233,8 +240,8 @@ class WikiQAEnv(BaseLanguageBasedEnv):
                 if item["role"] == "system":
                     ans += self.template_dict['system']
                 elif item["role"] == "user":
-                    ans += self.template_dict['user'].format(objective = item["question"], url = item["url"], observation
-                    = item["observation"], previous_action = item["previous_action"])
+                    ans += self.template_dict['user'].format(objective=item["question"], url=item["url"], observation
+                    =item["observation"], previous_action=item["previous_action"])
                 else:
                     print(item)
                     raise ValueError("role not recognized")
@@ -247,6 +254,8 @@ class WikiQAEnv(BaseLanguageBasedEnv):
         导出当前环境的状态，不包括不可序列化的浏览器对象（self.env）。
         保存问答状态、交互历史以及浏览器关键信息（当前页面 URL 与 storage_state）。
         """
+        # print(self.max_steps)
+        # print("##########################")
         state = {
             "question": self.question,
             "gt": self.gt,
@@ -278,6 +287,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
             except Exception as e:
                 browser_state["storage_state"] = None
         state["browser_state"] = browser_state
+        # print(state)
         return state
 
     def close(self):
@@ -298,9 +308,10 @@ class WikiQAEnv(BaseLanguageBasedEnv):
         手动重建浏览器环境，恢复保存的 page_url 与 storage_state。
         """
         # 恢复业务状态字段
+        # print(state)
         self.question = state.get("question", self.question)
         self.gt = state.get("gt", self.gt)
-        self.max_steps = state.get("max_steps", self.max_steps)
+        self.max_steps = int(state.get("max_steps", self.max_steps))
         self.threshold = state.get("threshold", self.threshold)
         self.prompt_format = state.get("prompt_format", self.prompt_format)
         self.current_step = state.get("current_step", self.current_step)
@@ -408,6 +419,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
     def success(self) -> bool:
         pass
 
+
 # ============ 测试示例 ============
 def test_wiki_qa_env():
     import time
@@ -478,8 +490,10 @@ def test_wiki_qa_env():
     # 最后关闭环境
     env.close()
 
+
 import pickle
 from collections.abc import Mapping, Sequence, Set
+
 
 def test_pickle_recursively(obj, prefix="obj", visited=None, max_depth=5):
     """
@@ -525,7 +539,7 @@ def test_pickle_recursively(obj, prefix="obj", visited=None, max_depth=5):
     # 只有在当前对象本身 pickle 成功后，才值得深入检查子属性
     # 因为如果本体都不可 pickle，就已经报错了
     if max_depth > 0:
-        print("#"*50)
+        print("#" * 50)
         if hasattr(obj, "__dict__"):
             for k, v in vars(obj).items():
                 test_pickle_recursively(v, f"{prefix}.{k}", visited, max_depth - 1)
@@ -536,10 +550,12 @@ def test_pickle_recursively(obj, prefix="obj", visited=None, max_depth=5):
             for i, v in enumerate(obj):
                 test_pickle_recursively(v, f"{prefix}[{i}]", visited, max_depth - 1)
 
+
 def test_pickle():
     env = WikiQAEnv("Who is current US president", "Biden")
     print("=== Testing Picklability of WikiQAEnv Attributes ===")
     test_pickle_recursively(env)
+
 
 if __name__ == "__main__":
     test_wiki_qa_env()
