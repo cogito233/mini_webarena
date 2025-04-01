@@ -8,7 +8,6 @@ from difflib import SequenceMatcher
 # nltk.download('punkt')
 
 def clean_text(text: str) -> str:
-    """去除前后空格、引号并转小写。"""
     text = text.strip().lower()
     if (text.startswith("'") and text.endswith("'")) or (text.startswith('"') and text.endswith('"')):
         text = text[1:-1]
@@ -98,8 +97,8 @@ def fuzzy_match(ref: str, pred: str,
     - 顺序调换 => ~0.6 ~ 0.7
     - 仅部分相同 => ~0.2
     """
-    print("Now is in fuzzy_match")
-    print(f"ref: {ref}, pred: {pred}")
+    # print("Now is in fuzzy_match")
+    # print(f"ref: {ref}, pred: {pred}")
 
     ref = clean_text(ref)
     pred = clean_text(pred)
@@ -109,14 +108,17 @@ def fuzzy_match(ref: str, pred: str,
     dist_penalty = edit_distance_ratio(ref, pred)  # [0, 1+]
 
     score = alpha * char_lcs + beta * tok_f1 - gamma * dist_penalty
-    print("score: ", score)
+    # print("score: ", score)
     return max(0.0, min(score, 1.0))  # 可以截断在 [0, 1] 内，视需求而定
 
+# Not Used
 def get_last_action(trajectory):
     if not trajectory:
         raise ValueError("Trajectory is empty, cannot get last action.")
     return trajectory[-1]
 
+
+# Not Used
 def compute_score_with_fuzzy_match(trajectory, config_file) -> float:
     """
     用 fuzzy_match 计算分数的最小示例。
@@ -141,19 +143,46 @@ def compute_score_with_fuzzy_match(trajectory, config_file) -> float:
     return max(scores)
 
 # ========== 测试示例 ==========
+def metric_exact_match(refs, pred):
+    norm_pred = pred.strip().lower()
+    norm_refs = [r.strip().lower() for r in refs]
+    return 1 if (norm_pred in norm_refs) else 0
+
+def metric_heuristic(refs, pred):
+    norm_pred = pred.strip().lower()
+    norm_refs = [r.strip().lower() for r in refs]
+    return max(fuzzy_match(ref, norm_pred) for ref in refs)
+
 if __name__ == '__main__':
-    nltk.download('punkt', quiet=True)
-    nltk.download('punkt_tab', quiet=True)
-
-    ref = "Starr Andrews"
-    pred1 = "Starr Andrews"  # 完全相同
-    pred2 = "Andrews Starr"  # 顺序调换
-    pred3 = "Andrews John"  # 仅部分匹配
-
-    s1 = fuzzy_match(ref, pred1)  # ~1
-    s2 = fuzzy_match(ref, pred2)  # ~0.6
-    s3 = fuzzy_match(ref, pred3)  # ~0.2
-
-    print(f"Pred1 => {s1:.4f}")
-    print(f"Pred2 => {s2:.4f}")
-    print(f"Pred3 => {s3:.4f}")
+    # nltk.download('punkt', quiet=True)
+    # nltk.download('punkt_tab', quiet=True)
+    #
+    # ref = "Starr Andrews"
+    # pred1 = "Starr Andrews"  # 完全相同
+    # pred2 = "Andrews Starr"  # 顺序调换
+    # pred3 = "Andrews John"  # 仅部分匹配
+    #
+    # s1 = fuzzy_match(ref, pred1)  # ~1
+    # s2 = fuzzy_match(ref, pred2)  # ~0.6
+    # s3 = fuzzy_match(ref, pred3)  # ~0.2
+    #
+    # print(f"Pred1 => {s1:.4f}")
+    # print(f"Pred2 => {s2:.4f}")
+    # print(f"Pred3 => {s3:.4f}")
+    refs = ["of Luca Pacioli", "Summa de arithmetica"]
+    pred = "of Luca Pacioli"
+    print(f"Example 1, refs = {refs}, pred = {pred}")
+    print("Exact match: ", metric_exact_match(refs, pred))
+    print("Heuristic: ", metric_heuristic(refs, pred))
+    print("")
+    refs = ["of Luca Pacioli", "Summa de arithmetica"]
+    pred = "Luca Pacioli"
+    print(f"Example 2, refs = {refs}, pred = {pred}")
+    print("Exact match: ", metric_exact_match(refs, pred))
+    print("Heuristic: ", metric_heuristic(refs, pred))
+    print("")
+    refs = ["of Luca Pacioli", "Summa de arithmetica"]
+    pred = "Pacioli Luca"
+    print(f"Example 3, refs = {refs}, pred = {pred}")
+    print("Exact match: ", metric_exact_match(refs, pred))
+    print("Heuristic: ", metric_heuristic(refs, pred))
