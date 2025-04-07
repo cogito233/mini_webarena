@@ -151,7 +151,7 @@ def metric_exact_match(refs, pred):
 def metric_heuristic(refs, pred):
     norm_pred = pred.strip().lower()
     norm_refs = [r.strip().lower() for r in refs]
-    return max(fuzzy_match(ref, norm_pred) for ref in refs)
+    return max(fuzzy_match(ref, norm_pred) for ref in norm_refs)
 
 if __name__ == '__main__':
     # nltk.download('punkt', quiet=True)

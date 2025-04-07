@@ -73,7 +73,85 @@ Avoid incorrect formats that omit brackets around parameters or numeric values.\
         "assistant":"<|im_start|>assistant {pred}\n<|im_end|>",
      },
 }
+WIKI_LANDING = """<|im_start|>user
+Objective: when is the next deadpool movie being released
 
+URL: http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing
+Observation:
+[1] RootWebArea 'User:The other Kiwix guy/Landing' focused: True
+        [21] textbox "Search 'Wikipedia'" required: False
+        [23] link 'Go to welcome page'
+                [30] button '🏠'
+        [24] link "Go to the main page of 'Wikipedia'"
+                [32] button 'Wikipedia'
+        [25] link 'Go to a randomly selected page'
+                [34] button '🎲'
+        [82] StaticText 'Welcome to '
+        [83] link 'Wikipedia'
+        [84] StaticText 'The free encyclopedia.'
+        [371] StaticText '6,489,052'
+        [86] StaticText ' articles in '
+        [369] link 'English'
+        [53] heading 'Arts'
+        [89] link 'Architecture'
+        [91] link 'Books'
+        [93] link 'Cinematography'
+        [95] link 'Dance'
+        [97] link 'Design'
+        [99] link 'Fashion'
+        [101] link 'Films'
+        [103] link 'Gastronomy'
+        [105] link 'Literature'
+        [107] link 'Magic (illusion)'
+        [109] link 'Music'
+        [111] link 'Painting'
+        [113] link 'Photography'
+        [115] link 'Poetry'
+        [117] link 'Sculpture'
+        [119] link 'Theatre'
+        [55] heading 'Geography'
+        [122] link 'Africa'
+        [124] link 'Antarctica'
+        [126] link 'Arctic'
+        [128] link 'Asia'
+        [130] link 'Caribbean'
+        [132] link 'Central America'
+        [134] link 'Europe'
+        [136] link 'Latin America'
+        [138] link 'Mediterranean'
+        [140] link 'Middle East'
+        [142] link 'North America'
+        [144] link 'Oceania'
+        [146] link 'South America'
+        [148] link 'Cartography'
+        [57] heading 'History'
+        [150] link 'Ancient Egypt'
+        [152] link 'Ancient Greece'
+        [154] link 'Ancient Near East'
+        [156] link 'Ancient Rome'
+        [158] link 'Archaeology'
+        [160] link 'British Empire'
+        [162] link 'Byzantine Empire'
+        [164] link 'Colonialism'
+        [166] link 'Crusades'
+        [168] link 'Heraldry'
+        [170] link 'History of science'
+        [172] link 'Imperial China'
+        [174] link 'Indian independence movement'
+        [176] link 'Japan'
+        [178] link 'Middle Ages'
+        [180] link 'Mughal Empire'
+        [182] link 'Ottoman Empire'
+        [184] link 'Russian Empire'
+        [186] link 'Sasanian Empire'
+        [188] link 'Seljuk Empire'
+        [190] link 'Soviet Union'
+        [192] link 'War'
+        [59] heading 'Sciences'
+Parsed Previous Action:
+None
+<|im_end|>\n\n
+"""
 def main():
     parser = argparse.ArgumentParser(description="Generate puzzle dataset from CSV.")
     parser.add_argument("--output_dir", type=str, default="data/puzzle", help="Output directory.")

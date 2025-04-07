@@ -397,11 +397,21 @@ def test_wiki_qa_env():
     print("--------------------------------------------------")
 
     # 5. 第二次 step: 执行 'stop [I don't know.]' 并打印渲染结果
-    action_2 = "<think>balabalabalabala</think>\n```stop [Sept 18, 2018]```"
+    action_2 = "<think>balabalabalabala</think>\n```type [1407] [death row inmates in the US] [1]```"
     print("=== Step 2: Action ===")
     print(f"Action: {action_2}")
     observation, reward, done, info = env.step(action_2)
     print("=== Observation After Action 2 ===")
+    print(env.render())
+    print(f"Reward: {reward}, Done: {done}")
+    print("--------------------------------------------------")
+
+    # 5. 第二次 step: 执行 'stop [I don't know.]' 并打印渲染结果
+    action_3 = "<think>balabalabalabala</think>\n```stop [Sept 18, 2018]```"
+    print("=== Step 3: Action ===")
+    print(f"Action: {action_3}")
+    observation, reward, done, info = env.step(action_3)
+    print("=== Observation After Action 3 ===")
     print(env.render())
     print(f"Reward: {reward}, Done: {done}")
     print("--------------------------------------------------")

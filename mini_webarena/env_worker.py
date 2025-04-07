@@ -173,6 +173,7 @@ class WikiQAEnv(BaseLanguageBasedEnv):
             obs, _, terminated, _, info = self.env.step(action_extracted)
         except Exception as e:
             print("######################### Error in run step")
+            print(self.prompt_format)
             print(self.render())
             print("######################### Error in run step")
             raise e
@@ -444,7 +445,12 @@ def test_wiki_qa_env():
     print("Render:", env.render())
 
     # 3. 第一次 step: 执行 action_1
-    action_1 = "<think>balabalabalabala</think>\n```click [99]```"
+    action_1 = (
+                '<think>To find out who plays the wildling woman in "Game of Thrones," '
+                'I should use the search functionality on this page. The search textbox has the ID 21. '
+                'I will type the query "Game of Thrones wildling woman actor" into the search box and press enter to search for the information.</think>\n'
+                '```type [21] [Game of Thrones wildling woman actor] [1]```�\']>;\n<thէ'
+            ),
     print("=== Step 1: Action ===")
     print("Action:", action_1)
     observation, reward, done, info = env.step(action_1)
@@ -454,26 +460,26 @@ def test_wiki_qa_env():
     print("--------------------------------------------------")
 
     # 保存状态后关闭当前环境
-    print("=== Saving state after Step 1 ===")
-    state = env.get_state()
-    env.close()
-    del env
-
-    # 新建环境并加载状态
-    env = WikiQAEnv("Who is current US president", "Biden", prompt_format="single")
-    env.load_state(state)
-    print("=== After reloading state, render ===")
-    print("Render:", env.render())
+    # print("=== Saving state after Step 1 ===")
+    # state = env.get_state()
+    # env.close()
+    # del env
+    #
+    # # 新建环境并加载状态
+    # env = WikiQAEnv("Who is current US president", "Biden", prompt_format="single")
+    # env.load_state(state)
+    # print("=== After reloading state, render ===")
+    # print("Render:", env.render())
 
     # 4. 第二次 step: 执行 action_2
-    action_2 = "<think>balabalabalabala</think>\n```stop [Sept 18, 2018]```"
-    print("=== Step 2: Action ===")
-    print("Action:", action_2)
-    observation, reward, done, info = env.step(action_2)
-    print("=== Observation After Action 2 ===")
-    print("Render:", env.render())
-    print(f"Reward: {reward}, Done: {done}")
-    print("--------------------------------------------------")
+    # action_2 = "<think>balabalabalabala</think>\n```scroll [down]```"
+    # print("=== Step 2: Action ===")
+    # print("Action:", action_2)
+    # observation, reward, done, info = env.step(action_2)
+    # print("=== Observation After Action 2 ===")
+    # print("Render:", env.env._get_obs())
+    # print(f"Reward: {reward}, Done: {done}")
+    # print("--------------------------------------------------")
 
     # 保存状态后关闭当前环境
     print("=== Saving state after Step 2 ===")
@@ -485,77 +491,10 @@ def test_wiki_qa_env():
     env = WikiQAEnv("Who is current US president", "Biden", prompt_format="single")
     env.load_state(state)
     print("=== After reloading state, render ===")
-    print("Render:", env.render())
+    print("Render:", env.env._get_obs())
 
     # 最后关闭环境
     env.close()
-
-
-import pickle
-from collections.abc import Mapping, Sequence, Set
-
-
-def test_pickle_recursively(obj, prefix="obj", visited=None, max_depth=5):
-    """
-    尝试递归遍历 obj 的属性，并测试是否可被 pickle。
-    prefix: 用于打印时表明当前对象层级的标签。
-    visited: 避免重复检测同一个对象 (by id)。
-    max_depth: 递归最大深度，防止无限循环。
-    """
-
-    if visited is None:
-        visited = set()
-
-    obj_id = id(obj)
-    if obj_id in visited:
-        return  # 已检测过这个对象，防重复循环
-    visited.add(obj_id)
-
-    # 1) 先尝试对当前对象做 pickle
-    try:
-        pickle.dumps(obj)
-        print(f"[✅] {prefix} is picklable: {type(obj)}")
-    except Exception as e:
-        print(f"[❌] {prefix} cannot be pickled: {type(obj)}, reason: {e}")
-
-        # 如果深度还够，继续探查内部属性(如果有)
-        if max_depth > 0:
-            # 2) 如果对象有 __dict__，递归其属性
-            if hasattr(obj, "__dict__"):
-                for k, v in vars(obj).items():
-                    test_pickle_recursively(v, f"{prefix}.{k}", visited, max_depth - 1)
-
-            # 3) 如果对象是常见容器类型(list/tuple/dict/set)，也要继续遍历
-            elif isinstance(obj, Mapping):
-                for k, v in obj.items():
-                    test_pickle_recursively(v, f"{prefix}[{k!r}]", visited, max_depth - 1)
-            elif isinstance(obj, (Sequence, Set)) and not isinstance(obj, (str, bytes, bytearray)):
-                # list/tuple/set
-                for i, v in enumerate(obj):
-                    test_pickle_recursively(v, f"{prefix}[{i}]", visited, max_depth - 1)
-
-        return  # 测完内部属性就可以返回
-
-    # 只有在当前对象本身 pickle 成功后，才值得深入检查子属性
-    # 因为如果本体都不可 pickle，就已经报错了
-    if max_depth > 0:
-        print("#" * 50)
-        if hasattr(obj, "__dict__"):
-            for k, v in vars(obj).items():
-                test_pickle_recursively(v, f"{prefix}.{k}", visited, max_depth - 1)
-        elif isinstance(obj, Mapping):
-            for k, v in obj.items():
-                test_pickle_recursively(v, f"{prefix}[{k!r}]", visited, max_depth - 1)
-        elif isinstance(obj, (Sequence, Set)) and not isinstance(obj, (str, bytes, bytearray)):
-            for i, v in enumerate(obj):
-                test_pickle_recursively(v, f"{prefix}[{i}]", visited, max_depth - 1)
-
-
-def test_pickle():
-    env = WikiQAEnv("Who is current US president", "Biden")
-    print("=== Testing Picklability of WikiQAEnv Attributes ===")
-    test_pickle_recursively(env)
-
 
 if __name__ == "__main__":
     test_wiki_qa_env()
