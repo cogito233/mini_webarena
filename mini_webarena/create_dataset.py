@@ -53,12 +53,12 @@ TEMPLATES = {
         "   <think>This button looks relevant to my goal. Clicking it should take me to the next step.</think>\n"
         "   ```click [1234]```\n"
         "6. Issue the stop action when you think you have achieved the objective. Don’t generate anything after stop.\n"
-        "<|im_end|>\n"
         """7. Always format actions correctly: 
 ```command [parameters]```
 For example, if searching for "death row inmates in the US" in a search field with ID `21`, correctly format it as:
 ```type [21] [death row inmates in the US] [1]```
 Avoid incorrect formats that omit brackets around parameters or numeric values.\n\n"""
+"<|im_end|>\n"
         ),
         # ---- user message ----
         "user":("<|im_start|>user\n"
@@ -74,7 +74,7 @@ Avoid incorrect formats that omit brackets around parameters or numeric values.\
      },
 }
 WIKI_LANDING = """<|im_start|>user
-Objective: when is the next deadpool movie being released
+Objective: {objective}
 
 URL: http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing
 Observation:
