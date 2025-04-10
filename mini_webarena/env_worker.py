@@ -117,17 +117,19 @@ class WikiQAEnv(object):
                 {"role": "assistant", "pred": action, "action_extracted": action_extracted})
             return (obs, self.done, validity)
 
-        try:
-            obs, _, terminated, _, _ = self.env.step(action_extracted)
-        except Exception as e:
-            print("######################### Error in run step, action invalid")
-            # print(self.render(prompt_format = "full"))
-            # raise e
-            print(action_extracted)
-            # print(self.render())
+        if action_extracted["action_type"] == ActionTypes.NONE:
+            validity = False
             action_extracted = create_none_action()
             obs = self.env._get_obs()
-            validity = False
+        else:
+            try:
+                obs, _, terminated, _, _ = self.env.step(action_extracted)
+            except Exception as e:
+                print("######################### Error in run step, action invalid")
+                print(action_extracted)
+                action_extracted = create_none_action()
+                obs = self.env._get_obs()
+                validity = False
 
         self.history.append(
             {"role": "assistant", "pred": action, "action_extracted": action_extracted})
