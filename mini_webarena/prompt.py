@@ -19,18 +19,20 @@ class Instruction(TypedDict):
     template: str
     meta_data: dict[str, Any]
 
+instruction_path = Path(__file__).parent / "prompt.json"
 
 class PromptConstructor(object):
     def __init__(
             self,
-            instruction_path: str | Path,
+            # instruction_path: str | Path,
             lm_config: LMConfig,
             tokenizer: Tokenizer,
     ):
-        self.instruction_path = Path(instruction_path)
+        # self.instruction_path = Path(instruction_path)
         self.obs_modality = "text"
         self.lm_config = lm_config
-        instruction = json.load(open(self.instruction_path))
+        # load from json_prompt
+        instruction = json.load(open(instruction_path))
         instruction["examples"] = [tuple(e) for e in instruction["examples"]]
         self.instruction: Instruction = instruction
         self.tokenizer = tokenizer
@@ -61,13 +63,13 @@ class PromptConstructor(object):
         #         message.append({"role": "user", "content": current})
         #         return message
         #     elif self.lm_config.mode == "completion":
-        #         message = f"{intro}\n\n"
-        #         message += "Here are a few examples:\n"
+        #         message = f"{intro}\\n\\n"
+        #         message += "Here are a few examples:\\n"
         #         for example in examples:
-        #             message += f"Observation\n:{example[0]}\n\n"
-        #             message += f"Action: {example[1]}\n\n"
-        #         message += "Now make prediction given the observation\n\n"
-        #         message += f"Observation\n:{current}\n\n"
+        #             message += f"Observation\\n:{example[0]}\\n\\n"
+        #             message += f"Action: {example[1]}\\n\\n"
+        #         message += "Now make prediction given the observation\\n\\n"
+        #         message += f"Observation\\n:{current}\\n\\n"
         #         message += "Action:"
         #         return message
         #     else:
@@ -81,7 +83,7 @@ class PromptConstructor(object):
             if "Llama-2" in self.lm_config.model:
                 if self.lm_config.mode == "chat":
                     B_INST, E_INST = "[INST]", "[/INST]"
-                    B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+                    B_SYS, E_SYS = "<<SYS>>\\n", "\\n<</SYS>>\\n\\n"
                     BOS, EOS = "<s>", "</s>"
                     # adding the system message to be the starting of the first example
                     examples = [
@@ -104,9 +106,9 @@ class PromptConstructor(object):
                     raise ValueError("Only chat mode is supported for Llama-2")
             elif "Qwen" in self.lm_config.model:
                 if self.lm_config.mode == "chat":
-                        B_INST, E_INST = "<|im_start|>user\n", "<|im_end|>\n"
-                        B_SYS, E_SYS = "<|im_start|>system\n", "<|im_end|>\n"
-                        BOS, EOS = "<|im_start|>assistant\n", "<|im_end|>\n"
+                        B_INST, E_INST = "<|im_start|>user\\n", "<|im_end|>\\n"
+                        B_SYS, E_SYS = "<|im_start|>system\\n", "<|im_end|>\\n"
+                        BOS, EOS = "<|im_start|>assistant\\n", "<|im_end|>\\n"
 
                         # 添加system message到第一个example
                         examples = [
@@ -132,9 +134,9 @@ class PromptConstructor(object):
                     f"Huggingface models do not support model_tag {self.lm_config.gen_config['model_tag']}"
                 )
         # elif "ours" in self.lm_config.provider:
-        #     message = f"{intro}\n\n"
-        #     message += "Now make prediction given the observation\n\n"
-        #     message += f"Observation\n:{current}\n\n"
+        #     message = f"{intro}\\n\\n"
+        #     message += "Now make prediction given the observation\\n\\n"
+        #     message += f"Observation\\n:{current}\\n\\n"
         #     message += "Action:"
         #     return message
         else:
@@ -180,11 +182,11 @@ class CoTPromptConstructor(PromptConstructor):
 
     def __init__(
             self,
-            instruction_path: str | Path,
+            # instruction_path: str | Path,
             lm_config: LMConfig,
             tokenizer: Tokenizer,
     ):
-        super().__init__(instruction_path, lm_config, tokenizer)
+        super().__init__(lm_config, tokenizer)
         self.answer_phrase = self.instruction["meta_data"]["answer_phrase"]
         self.max_length = 4096
         self.tokenizer = tokenizer
@@ -226,7 +228,7 @@ class CoTPromptConstructor(PromptConstructor):
     def _extract_action(self, response: str) -> str:
         # find the first occurence of action
         action_splitter = self.instruction["meta_data"]["action_splitter"]
-        pattern = rf"{action_splitter}((.|\n)*?){action_splitter}"
+        pattern = rf"{action_splitter}((.|\\n)*?){action_splitter}"
         match = re.search(pattern, response)
         # print(response)
         # print(pattern)

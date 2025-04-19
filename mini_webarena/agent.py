@@ -164,25 +164,23 @@ def parse_action(response, prompt_constructor):
     # print(action)
     return action
 
-def construct_agent(model_name, inference_endpoint) -> Agent:
-    llm_config = construct_llm_config(model_name, inference_endpoint)
-    tokenizer = Tokenizer("huggingface", model_name)
-    from prompt import CoTPromptConstructor
-    prompt_constructor = CoTPromptConstructor(
-            "/home/zhiheng/AgentRAG/agent/jsons/p_cot_id_actree_2s.json", lm_config=llm_config, tokenizer=tokenizer
-        )
-    agent = PromptAgent(
-            action_set_tag="id_accessibility_tree",
-            lm_config=llm_config,
-            prompt_constructor=prompt_constructor,
-        )
-    return agent
+# def construct_agent(model_name, inference_endpoint) -> Agent:
+#     llm_config = construct_llm_config(model_name, inference_endpoint)
+#     tokenizer = Tokenizer("huggingface", model_name)
+#     from prompt import CoTPromptConstructor
+#     prompt_constructor = CoTPromptConstructor(
+#             "/home/zhiheng/AgentRAG/agent/jsons/p_cot_id_actree_2s.json", lm_config=llm_config, tokenizer=tokenizer
+#         )
+#     agent = PromptAgent(
+#             action_set_tag="id_accessibility_tree",
+#             lm_config=llm_config,
+#             prompt_constructor=prompt_constructor,
+#         )
+#     return agent
 
 # Once we have this we can decompose the agent into smaller components
 def construct_promptConstructor(model_name, inference_endpoint) -> PromptConstructor:
     llm_config = construct_llm_config(model_name, inference_endpoint)
     tokenizer = Tokenizer("huggingface", model_name)
-    prompt_constructor = CoTPromptConstructor(
-        "/home/zhiheng/WikiRL/ragen/env/wiki/prompt.json", lm_config=llm_config, tokenizer=tokenizer
-    )
+    prompt_constructor = CoTPromptConstructor(lm_config=llm_config, tokenizer=tokenizer)
     return prompt_constructor, tokenizer, llm_config
