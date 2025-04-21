@@ -230,17 +230,16 @@ class CoTPromptConstructor(PromptConstructor):
         action_splitter = self.instruction["meta_data"]["action_splitter"]
         pattern = rf"{action_splitter}((.|\\n)*?){action_splitter}"
         match = re.search(pattern, response)
-        # print(response)
-        # print(pattern)
-        # print(match)
-        # exit(0)
         if match:
             return match.group(1).strip()
         else:
+            preview = response[:300].replace("\n", "\\n") + ("..." if len(response) > 300 else "")
             raise ActionParsingError(
-                f'Cannot find the answer phrase "{self.answer_phrase}" in "{response}"'
+                f"Failed to parse action using splitter `{action_splitter}`. "
+                f"No match found in the response.\n"
+                f"Response preview: \"{preview}\"\n"
+                f"Expected format: `{action_splitter}<action>{action_splitter}`"
             )
-
 
 if __name__ == "__main__":
     pass

@@ -28,7 +28,7 @@ class WikiQAEnv(object):
             question, gt,
             max_steps: int = 10,
             threshold: float = 0.7,
-            prompt_format="last",  # full, last, single, tunc
+            prompt_format="single",  # full, last, single, tunc
             url = None
     ):
         super().__init__()
@@ -65,6 +65,12 @@ class WikiQAEnv(object):
         obs, _ = self.env.reset_without_config(start_url=self.url)
         self.history = [{"role": "system"}, {"role": "user", "question": self.question, "url": self.url,
                                              "observation": obs[self.obs_modality], "previous_action": None}]
+        self.pure_obs_temp = ("<browser>Objective: {objective}\n\n"
+        "URL: {url}\n"
+        "Observation:\n"
+        "{observation}\n"
+        "Parsed Previous Action:\n"
+        "{previous_action}\n</browser>")
         # self._reset_tracking_variables()
 
     # def reset_qa(self, question, gt, url=None) -> Any:
@@ -168,11 +174,15 @@ class WikiQAEnv(object):
             for item in history:
                 if item["role"] == "system":
                     ans += self.template_dict['system']
+                    # raise ValueError("role not recognized")
                 elif item["role"] == "user":
                     ans += self.template_dict['user'].format(objective=item["question"], url=item["url"], observation
                     =item["observation"], previous_action=item["previous_action"])
+                    # ans += self.pure_obs_temp.format(objective=item["question"], url=item["url"], observation=item["observation"],
+                    #                                  previous_action=item["previous_action"])
                 elif item["role"] == "assistant":
                     ans += self.template_dict['assistant'].format(pred=item["pred"])
+                    # raise ValueError("role not recognized")
                 else:
                     raise ValueError("role not recognized")
             return ans + "<|im_start|>assistant"
@@ -181,9 +191,12 @@ class WikiQAEnv(object):
             ans = ""
             for item in history:
                 if item["role"] == "system":
-                    ans += self.template_dict['system']
+                    # ans += self.template_dict['system']
+                    print(item)
+                    raise ValueError("role not recognized")
                 elif item["role"] == "user":
-                    ans += self.template_dict['user'].format(objective=item["question"], url=item["url"], observation=item["observation"], previous_action=item["previous_action"])
+                    ans += self.pure_obs_temp.format(objective=item["question"], url=item["url"], observation=item["observation"],
+                                                     previous_action=item["previous_action"])
                 else:
                     print(item)
                     raise ValueError("role not recognized")
