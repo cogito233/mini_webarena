@@ -59,7 +59,7 @@ class WikiQAEnv(object):
         from .agent import construct_promptConstructor
         self.prompt_constructor, self.tokenizer, _ = construct_promptConstructor("Qwen/Qwen2.5-14B-Instruct", None)
         if url == None:
-            self.url = "http://localhost:22015/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+            self.url = "https://tigerai.ca/wiki/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
         else:
             self.url = url
         obs, _ = self.env.reset_without_config(start_url=self.url)
