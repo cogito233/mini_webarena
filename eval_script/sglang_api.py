@@ -49,7 +49,7 @@ def _find_free_port() -> int:
 def start_server(
     model_path: str,
     python_bin: str = "python",
-    host: str = "0.0.0.0",
+    host: str = "localhost",
 ):
     """
     Launch an `sglang.launch_server` process with the *given* Python interpreter
@@ -204,7 +204,7 @@ _client_singleton: Optional[SGLangLocalClient] = None
 def init_sglang_local(
     model_path: str = "Qwen/Qwen3-4B",
     cuda: str = "0",
-    python_bin: str = "/home/zhiheng/cogito/verl-tool/mini_webarena/.venv/bin/python"
+    python_bin: str = "/minimax-dialogue/ruobai/cogito/verl-tool/mini_webarena/.venv/bin/python"
 ):
     """
     Convenience wrapper to create a singleton client.
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument("--cuda", default="0", help="CUDA_VISIBLE_DEVICES value")
     parser.add_argument(
         "--python-bin",
-        default="/home/zhiheng/cogito/verl-tool/mini_webarena/.venv/bin/python",
+        default="/minimax-dialogue/ruobai/cogito/verl-tool/mini_webarena/.venv/bin/python",
         help="Absolute path to python interpreter in the venv running sglang",
     )
     args = parser.parse_args()
