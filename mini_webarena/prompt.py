@@ -225,21 +225,36 @@ class CoTPromptConstructor(PromptConstructor):
         prompt = self.get_lm_api_input(intro, examples, current)
         return prompt
 
+    # def _extract_action(self, response: str) -> str:
+    #     # find the first occurence of action
+    #     action_splitter = self.instruction["meta_data"]["action_splitter"]
+    #     pattern = rf"{action_splitter}((.|\\n)*?){action_splitter}"
+    #     match = re.search(pattern, response)
+    #     if match:
+    #         return match.group(1).strip()
+    #     else:
+    #         preview = response[:300].replace("\n", "\\n") + ("..." if len(response) > 300 else "")
+    #         raise ActionParsingError(
+    #             f"Failed to parse action using splitter `{action_splitter}`. "
+    #             f"No match found in the response.\n"
+    #             f"Response preview: \"{preview}\"\n"
+    #             f"Expected format: `{action_splitter}<action>{action_splitter}`"
+    #         )
     def _extract_action(self, response: str) -> str:
-        # find the first occurence of action
-        action_splitter = self.instruction["meta_data"]["action_splitter"]
-        pattern = rf"{action_splitter}((.|\\n)*?){action_splitter}"
-        match = re.search(pattern, response)
+        # 先尝试新格式
+        match = re.search(r"<action>(.*?)</action>", response, re.DOTALL)
         if match:
             return match.group(1).strip()
-        else:
-            preview = response[:300].replace("\n", "\\n") + ("..." if len(response) > 300 else "")
-            raise ActionParsingError(
-                f"Failed to parse action using splitter `{action_splitter}`. "
-                f"No match found in the response.\n"
-                f"Response preview: \"{preview}\"\n"
-                f"Expected format: `{action_splitter}<action>{action_splitter}`"
-            )
+        # 再尝试旧格式
+        match = re.search(r"```(.*?)```", response, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        preview = response[:300].replace("\n", "\\n") + ("..." if len(response) > 300 else "")
+        raise ActionParsingError(
+            "Failed to parse action using <action>...</action> or ```...```.\n"
+            f"Response preview: \"{preview}\"\n"
+            "Expected format: <action>your_action_here</action> or ```your_action_here```"
+        )
 
 if __name__ == "__main__":
     pass
